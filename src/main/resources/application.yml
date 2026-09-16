@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: ecommerce-backend
+  data-source:
+    url: jdbc:mysql://localhost:3306/ecommerce_db
+    username: ecommerce_app
+    password: ChooseAStrongPassword123!
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+
