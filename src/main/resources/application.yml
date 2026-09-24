@@ -18,4 +18,13 @@ jwt:
   access-token-expiration: 900000      # 15 minutes in ms
   refresh-token-expiration: 604800000
 
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+server:
+  error:
+    include-message: always
+    include-stacktrace: always
+
 
