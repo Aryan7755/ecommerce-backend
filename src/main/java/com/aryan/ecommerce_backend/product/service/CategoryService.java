@@ -1,11 +1,13 @@
 package com.aryan.ecommerce_backend.product.service;
 
-
+import com.aryan.ecommerce_backend.product.dto.CategoryRequest;
 import com.aryan.ecommerce_backend.product.dto.CategoryResponse;
 import com.aryan.ecommerce_backend.product.entity.Category;
 import com.aryan.ecommerce_backend.product.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -13,17 +15,23 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public CategoryResponse create(String name ,Long parentId){
-        Category parent =null;
-        if (parentId != null) {
-            parent = categoryRepository.findById(parentId)
-                    .orElseThrow(() -> new IllegalArgumentException("Parent category not found"));
+    public CategoryResponse create(CategoryRequest request) {
+
+        Category parent = null;
+
+        if (request.parentId() != null) {
+            parent = categoryRepository.findById(request.parentId())
+                    .orElseThrow(() ->
+                            new IllegalArgumentException("Parent category not found"));
         }
+
         Category category = Category.builder()
-                .name(name)
+                .name(request.name())
                 .parent(parent)
                 .build();
+
         categoryRepository.save(category);
+
         return toResponse(category);
     }
 
@@ -31,7 +39,15 @@ public class CategoryService {
         return new CategoryResponse(
                 category.getId(),
                 category.getName(),
-                category.getParent() != null ? category.getParent().getId() : null
+                category.getParent() != null
+                        ? category.getParent().getId()
+                        : null
         );
+    }
+
+    public List<CategoryResponse> getAll() {
+        return categoryRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
     }
 }
