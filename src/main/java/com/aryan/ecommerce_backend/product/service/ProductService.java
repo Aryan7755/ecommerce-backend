@@ -6,7 +6,9 @@ import com.aryan.ecommerce_backend.product.entity.Category;
 import com.aryan.ecommerce_backend.product.entity.Product;
 import com.aryan.ecommerce_backend.product.repository.CategoryRepository;
 import com.aryan.ecommerce_backend.product.repository.ProductRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,4 +67,21 @@ public class ProductService {
     }
 
 
+    public @Nullable ProductResponse update(Long id, @Valid ProductRequest request) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product Not Found"));
+
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Category Not Found"));
+
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+        product.setStockQuantity(request.stockQuantity());
+        product.setCategory(category);
+
+        productRepository.save(product);
+
+        return toResponse(product);
+    }
 }
