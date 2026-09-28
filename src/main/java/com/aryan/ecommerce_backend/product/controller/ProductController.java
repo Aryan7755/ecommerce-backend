@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -43,8 +44,12 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getAll(Pageable pageable) {
-        return ResponseEntity.ok(productService.getAll(pageable));
+    public ResponseEntity<Page<ProductResponse>> getAll(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            Pageable pageable) {
+        return ResponseEntity.ok(productService.search(categoryId, minPrice, maxPrice, pageable));
     }
 
 }

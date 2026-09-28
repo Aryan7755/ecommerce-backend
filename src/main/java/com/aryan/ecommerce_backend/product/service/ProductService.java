@@ -11,8 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -85,5 +87,16 @@ public class ProductService {
         productRepository.save(product);
 
         return toResponse(product);
+    }
+
+    public Page<ProductResponse> search(Long categoryId, BigDecimal minPrice,
+                                        BigDecimal maxPrice, Pageable pageable){
+        Specification<Product> specification = Specification
+                .where(ProductSpecification.hasCategoryId(categoryId))
+                .and(ProductSpecification.priceGreaterThanOrEqual(minPrice))
+                .and(ProductSpecification.priceLessThanOrEqual(maxPrice));
+
+        return productRepository.findAll(specification,pageable).map(this::toResponse);
+
     }
 }
