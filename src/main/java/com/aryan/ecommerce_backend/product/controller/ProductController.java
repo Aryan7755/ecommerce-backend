@@ -6,6 +6,8 @@ import com.aryan.ecommerce_backend.product.dto.ProductResponse;
 import com.aryan.ecommerce_backend.product.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,8 +43,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResponse>> getAll() {
-        return ResponseEntity.ok(productService.getAll());
+    public ResponseEntity<Page<ProductResponse>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(productService.getAll(pageable));
     }
 
 }

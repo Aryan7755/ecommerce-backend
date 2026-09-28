@@ -9,6 +9,8 @@ import com.aryan.ecommerce_backend.product.repository.ProductRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -48,10 +50,10 @@ public class ProductService {
         return toResponse(product);
     }
 
-    public List<ProductResponse> getAll() {
-        return productRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<ProductResponse> getAll(Pageable pageable) {
+        return productRepository.findAll(pageable)
+                .map(this::toResponse);
+
     }
 
     private ProductResponse toResponse(Product product) {
