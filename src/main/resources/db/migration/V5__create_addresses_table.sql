@@ -1,0 +1,10 @@
+CREATE TABLE addresses (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    street VARCHAR(255) NOT NULL,
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+    zip VARCHAR(20) NOT NULL,
+    is_default BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_address_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
