@@ -3,6 +3,8 @@ package com.aryan.ecommerce_backend.order.service;
 import com.aryan.ecommerce_backend.cart.entity.Cart;
 import com.aryan.ecommerce_backend.cart.entity.CartItem;
 import com.aryan.ecommerce_backend.cart.service.CartService;
+import com.aryan.ecommerce_backend.exception.BadRequestException;
+import com.aryan.ecommerce_backend.exception.ResourceNotFoundException;
 import com.aryan.ecommerce_backend.order.entity.Order;
 import com.aryan.ecommerce_backend.order.entity.OrderItem;
 import com.aryan.ecommerce_backend.order.entity.OrderStatus;
@@ -42,14 +44,14 @@ public class OrderService {
     @Transactional
     public Order checkout(String userEmail, Long addressId) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new IllegalArgumentException("Address not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
 
         Cart cart = cartService.getCart(userEmail);
         if (cart.getItems().isEmpty()) {
-            throw new IllegalStateException("Cart is empty");
+            throw new BadRequestException("Cart is empty");
         }
 
         // Re-validate stock at checkout time — items in cart may have been
@@ -59,7 +61,7 @@ public class OrderService {
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
             if (product.getStockQuantity() < cartItem.getQuantity()) {
-                throw new IllegalStateException(
+                throw new ResourceNotFoundException(
                         "Insufficient stock for product: " + product.getName());
             }
         }
@@ -104,11 +106,11 @@ public class OrderService {
     @Transactional
     public Order updateStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         Set<OrderStatus> allowedNext = VALID_TRANSITIONS.get(order.getStatus());
         if (!allowedNext.contains(newStatus)) {
-            throw new IllegalStateException(
+            throw new SecurityException(
                     "Cannot transition order from " + order.getStatus() + " to " + newStatus);
         }
 
@@ -118,13 +120,13 @@ public class OrderService {
 
     public List<Order> getOrdersForUser(String userEmail) {
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return orderRepository.findByUserId(user.getId());
     }
 
     public Order getById(String userEmail, Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
 
         if (!order.getUser().getEmail().equals(userEmail)) {
             throw new SecurityException("Cannot view another user's order");

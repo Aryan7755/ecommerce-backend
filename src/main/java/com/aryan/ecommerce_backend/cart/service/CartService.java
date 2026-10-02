@@ -3,6 +3,7 @@ package com.aryan.ecommerce_backend.cart.service;
 import com.aryan.ecommerce_backend.cart.entity.Cart;
 import com.aryan.ecommerce_backend.cart.entity.CartItem;
 import com.aryan.ecommerce_backend.cart.repository.CartItemRepository;
+import com.aryan.ecommerce_backend.exception.ResourceNotFoundException;
 import com.aryan.ecommerce_backend.product.entity.Product;
 import com.aryan.ecommerce_backend.product.repository.ProductRepository;
 import com.aryan.ecommerce_backend.user.entity.User;
@@ -26,7 +27,7 @@ public class CartService {
     @Transactional
     public Cart getOrCreateCart(String userEmail){
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return cartRepository.findByUserId(user.getId())
                 .orElseGet(() -> {
                     Cart newCart = Cart.builder().user(user).build();
@@ -41,10 +42,10 @@ public class CartService {
         Cart cart = getOrCreateCart(userEmail);
 
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         if (product.getStockQuantity() < quantity) {
-            throw new IllegalArgumentException("Insufficient stock");
+            throw new ResourceNotFoundException("Insufficient stock");
         }
 
         var existing = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId);
@@ -53,7 +54,7 @@ public class CartService {
             CartItem item = existing.get();
             int newQuantity = item.getQuantity() + quantity;
             if (product.getStockQuantity() < newQuantity) {
-                throw new IllegalArgumentException("Insufficient stock");
+                throw new ResourceNotFoundException("Insufficient stock");
             }
             item.setQuantity(newQuantity);
         } else {
@@ -75,10 +76,10 @@ public class CartService {
         CartItem item = cart.getItems().stream()
                 .filter(i -> i.getId().equals(itemId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Cart item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
 
         if (item.getProduct().getStockQuantity() < quantity) {
-            throw new IllegalArgumentException("Insufficient stock");
+            throw new ResourceNotFoundException("Insufficient stock");
         }
 
         item.setQuantity(quantity);

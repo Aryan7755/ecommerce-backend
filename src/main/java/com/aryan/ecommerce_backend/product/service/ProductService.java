@@ -1,5 +1,6 @@
 package com.aryan.ecommerce_backend.product.service;
 
+import com.aryan.ecommerce_backend.exception.ResourceNotFoundException;
 import com.aryan.ecommerce_backend.product.dto.ProductRequest;
 import com.aryan.ecommerce_backend.product.dto.ProductResponse;
 import com.aryan.ecommerce_backend.product.entity.Category;
@@ -25,7 +26,7 @@ public class ProductService {
 
     public ProductResponse create(ProductRequest productRequest){
         Category category = categoryRepository.findById(productRequest.categoryId())
-                .orElseThrow(()-> new IllegalArgumentException("Category Not Found"));
+                .orElseThrow(()-> new ResourceNotFoundException("Category Not Found"));
 
         Product product = Product.builder()
                 .name(productRequest.name())
@@ -41,14 +42,14 @@ public class ProductService {
 
     public void delete(Long id){
         if(!productRepository.existsById(id)){
-            throw new IllegalArgumentException("Product Not Found");
+            throw new ResourceNotFoundException("Product Not Found");
         }
         productRepository.deleteById(id);
     }
 
     public ProductResponse getById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         return toResponse(product);
     }
 
@@ -73,10 +74,10 @@ public class ProductService {
 
     public @Nullable ProductResponse update(Long id, @Valid ProductRequest request) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product Not Found"));
 
         Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Category Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category Not Found"));
 
         product.setName(request.name());
         product.setDescription(request.description());

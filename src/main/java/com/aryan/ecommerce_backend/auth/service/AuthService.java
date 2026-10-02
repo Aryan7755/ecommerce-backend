@@ -4,6 +4,8 @@ package com.aryan.ecommerce_backend.auth.service;
 import com.aryan.ecommerce_backend.auth.dto.AuthResponse;
 import com.aryan.ecommerce_backend.auth.dto.LoginRequest;
 import com.aryan.ecommerce_backend.auth.dto.RegisterRequest;
+import com.aryan.ecommerce_backend.exception.BadRequestException;
+import com.aryan.ecommerce_backend.exception.ResourceNotFoundException;
 import com.aryan.ecommerce_backend.security.jwt.JwtService;
 import com.aryan.ecommerce_backend.security.user.CustomUserDetails;
 import com.aryan.ecommerce_backend.user.entity.Role;
@@ -25,7 +27,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request){
         if(userRepository.existsByEmail(request.email())){
-            throw new IllegalArgumentException("User is already registered.");
+            throw new BadRequestException("User is already registered.");
         }
         User user = User.builder()
                 .name(request.name())
@@ -48,7 +50,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
         return new AuthResponse(

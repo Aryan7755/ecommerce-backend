@@ -1,5 +1,6 @@
 package com.aryan.ecommerce_backend.product.service;
 
+import com.aryan.ecommerce_backend.exception.ResourceNotFoundException;
 import com.aryan.ecommerce_backend.product.dto.CategoryRequest;
 import com.aryan.ecommerce_backend.product.dto.CategoryResponse;
 import com.aryan.ecommerce_backend.product.entity.Category;
@@ -22,7 +23,7 @@ public class CategoryService {
         if (request.parentId() != null) {
             parent = categoryRepository.findById(request.parentId())
                     .orElseThrow(() ->
-                            new IllegalArgumentException("Parent category not found"));
+                            new ResourceNotFoundException("Parent category not found"));
         }
 
         Category category = Category.builder()
