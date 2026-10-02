@@ -17,8 +17,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,13 @@ public class OrderService {
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
+    private static final Map<OrderStatus, Set<OrderStatus>> VALID_TRANSITIONS = Map.of(
+            OrderStatus.PENDING, Set.of(OrderStatus.PAID, OrderStatus.CANCELLED),
+            OrderStatus.PAID, Set.of(OrderStatus.SHIPPED, OrderStatus.CANCELLED),
+            OrderStatus.SHIPPED, Set.of(OrderStatus.DELIVERED),
+            OrderStatus.DELIVERED, Set.of(),
+            OrderStatus.CANCELLED, Set.of()
+    );
 
     @Transactional
     public Order checkout(String userEmail, Long addressId) {
@@ -88,6 +97,38 @@ public class OrderService {
 
         cartService.clearCart(userEmail);
 
+        return order;
+    }
+
+
+    @Transactional
+    public Order updateStatus(Long orderId, OrderStatus newStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+        Set<OrderStatus> allowedNext = VALID_TRANSITIONS.get(order.getStatus());
+        if (!allowedNext.contains(newStatus)) {
+            throw new IllegalStateException(
+                    "Cannot transition order from " + order.getStatus() + " to " + newStatus);
+        }
+
+        order.setStatus(newStatus);
+        return orderRepository.save(order);
+    }
+
+    public List<Order> getOrdersForUser(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        return orderRepository.findByUserId(user.getId());
+    }
+
+    public Order getById(String userEmail, Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+        if (!order.getUser().getEmail().equals(userEmail)) {
+            throw new SecurityException("Cannot view another user's order");
+        }
         return order;
     }
 }
