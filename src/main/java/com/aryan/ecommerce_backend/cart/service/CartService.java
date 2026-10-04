@@ -45,7 +45,7 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
 
         if (product.getStockQuantity() < quantity) {
-            throw new ResourceNotFoundException("Insufficient stock");
+            throw new IllegalStateException("Insufficient stock");
         }
 
         var existing = cartItemRepository.findByCartIdAndProductId(cart.getId(), productId);
@@ -54,7 +54,7 @@ public class CartService {
             CartItem item = existing.get();
             int newQuantity = item.getQuantity() + quantity;
             if (product.getStockQuantity() < newQuantity) {
-                throw new ResourceNotFoundException("Insufficient stock");
+                throw new IllegalStateException("Insufficient stock");
             }
             item.setQuantity(newQuantity);
         } else {
@@ -79,7 +79,7 @@ public class CartService {
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
 
         if (item.getProduct().getStockQuantity() < quantity) {
-            throw new ResourceNotFoundException("Insufficient stock");
+            throw new IllegalStateException("Insufficient stock");
         }
 
         item.setQuantity(quantity);

@@ -61,7 +61,7 @@ public class OrderService {
         for (CartItem cartItem : cart.getItems()) {
             Product product = cartItem.getProduct();
             if (product.getStockQuantity() < cartItem.getQuantity()) {
-                throw new ResourceNotFoundException(
+                throw new IllegalStateException(
                         "Insufficient stock for product: " + product.getName());
             }
         }
@@ -110,7 +110,7 @@ public class OrderService {
 
         Set<OrderStatus> allowedNext = VALID_TRANSITIONS.get(order.getStatus());
         if (!allowedNext.contains(newStatus)) {
-            throw new SecurityException(
+            throw new IllegalStateException(
                     "Cannot transition order from " + order.getStatus() + " to " + newStatus);
         }
 
