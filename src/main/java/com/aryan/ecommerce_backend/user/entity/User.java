@@ -1,5 +1,6 @@
 package com.aryan.ecommerce_backend.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -21,7 +22,7 @@ public class User {
 
     @Column(unique = true, nullable = false)
     private String email;
-
+    @JsonIgnore
     private String password;
 
     @Enumerated(EnumType.STRING)
