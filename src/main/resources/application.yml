@@ -1,10 +1,12 @@
 spring:
   application:
     name: ecommerce-backend
-  data-source:
-    url: jdbc:mysql://localhost:3306/ecommerce_db
-    username: ecommerce_app
-    password: ChooseAStrongPassword123!
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/ecommerce_db}
+    username: ${SPRING_DATASOURCE_USERNAME:ecommerce_app}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+
   jpa:
     hibernate:
       ddl-auto: validate
@@ -12,13 +14,14 @@ spring:
     properties:
       hibernate:
         format_sql: true
-    jackson:
-      serialization:
-        fail-on-empty-beans: false
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
 
 jwt:
-  secret: "n4on5CfzCzC9hxCPhGYHsLRM2i4WMhC9/tj1nMkxkSsVZcy+b772A2nMASvp+utzp0EKLyn2S52FXiDK9md1Gw=="
-  access-token-expiration: 900000      # 15 minutes in ms
+  secret: ${JWT_SECRET}
+  access-token-expiration: 900000
   refresh-token-expiration: 604800000
 
 logging:
@@ -29,5 +32,3 @@ server:
   error:
     include-message: always
     include-stacktrace: always
-
-
