@@ -16,11 +16,19 @@ public class FilterConfig {
         FilterRegistrationBean<JwtAuthenticationFilter> registrationBean =
                 new FilterRegistrationBean<>(jwtAuthenticationFilter);
 
-        // Prevent Spring Boot from auto-registering this filter into the
-        // servlet container's generic filter chain. Spring Security already
-        // manages its lifecycle explicitly via SecurityConfig's
-        // .addFilterBefore(...), so without this line the filter runs twice
-        // per request.
+
+        registrationBean.setEnabled(false);
+
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<LoggingFilter> loggingFilterRegistration(
+            LoggingFilter loggingFilter) {
+
+        FilterRegistrationBean<LoggingFilter> registrationBean =
+                new FilterRegistrationBean<>(loggingFilter);
+
         registrationBean.setEnabled(false);
 
         return registrationBean;
