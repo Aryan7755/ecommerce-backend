@@ -1,9 +1,11 @@
 package com.aryan.ecommerce_backend.order.controller;
 
+import com.aryan.ecommerce_backend.order.dto.CheckoutRequest;
+import com.aryan.ecommerce_backend.order.dto.UpdateOrderStatusRequest;
 import com.aryan.ecommerce_backend.order.entity.Order;
-import com.aryan.ecommerce_backend.order.entity.OrderStatus;
 import com.aryan.ecommerce_backend.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,11 +24,9 @@ public class OrderController {
 
     @Operation(summary = "Create an order from the user's cart")
     @PostMapping("/checkout")
-    public ResponseEntity<Order> checkout(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody Map<String, Object> body) {
-        Long addressId = Long.valueOf(body.get("addressId").toString());
-        return ResponseEntity.ok(orderService.checkout(userDetails.getUsername(), addressId));
+    public ResponseEntity<Order> checkout(@AuthenticationPrincipal UserDetails userDetails,
+                                          @Valid @RequestBody CheckoutRequest request) {
+        return ResponseEntity.ok(orderService.checkout(userDetails.getUsername(), request.addressId()));
     }
 
     @Operation(summary = "Get all orders for the authenticated user")
@@ -44,9 +44,8 @@ public class OrderController {
 
     @Operation(summary = "Update an order's status (admin only)")
     @PutMapping("/{id}/status")
-    public ResponseEntity<Order> updateStatus(
-            @PathVariable Long id, @RequestBody Map<String, String> body) {
-        OrderStatus newStatus = OrderStatus.valueOf(body.get("status"));
-        return ResponseEntity.ok(orderService.updateStatus(id, newStatus));
+    public ResponseEntity<Order> updateStatus(@PathVariable Long id,
+                                              @Valid @RequestBody UpdateOrderStatusRequest request) {
+        return ResponseEntity.ok(orderService.updateStatus(id, request.status()));
     }
 }
