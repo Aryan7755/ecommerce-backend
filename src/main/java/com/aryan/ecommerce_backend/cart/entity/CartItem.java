@@ -1,6 +1,5 @@
 package com.aryan.ecommerce_backend.cart.entity;
 import com.aryan.ecommerce_backend.product.entity.Product;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +18,7 @@ public class CartItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
-    @JsonIgnore
+
     private Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
