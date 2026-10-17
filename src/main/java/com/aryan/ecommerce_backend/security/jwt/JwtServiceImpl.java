@@ -25,10 +25,21 @@ public class JwtServiceImpl implements JwtService {
         return buildToken(userDetails, jwtProperties.getAccessTokenExpiration());
     }
 
+
     @Override
     public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(userDetails, jwtProperties.getRefreshTokenExpiration());
+        return Jwts.builder()
+                .subject(userDetails.getUsername())
+                .id(java.util.UUID.randomUUID().toString())
+                .issuedAt(new Date())
+                .expiration(new Date(
+                        System.currentTimeMillis()
+                                + jwtProperties.getRefreshTokenExpiration()
+                ))
+                .signWith(getSigningKey())
+                .compact();
     }
+
 
     private String buildToken(UserDetails userDetails, long expiration) {
         return Jwts.builder()
