@@ -6,6 +6,7 @@ import com.aryan.ecommerce_backend.auth.dto.LoginRequest;
 import com.aryan.ecommerce_backend.auth.dto.RegisterRequest;
 import com.aryan.ecommerce_backend.exception.BadRequestException;
 import com.aryan.ecommerce_backend.security.jwt.JwtService;
+import com.aryan.ecommerce_backend.token.service.RefreshTokenService;
 import com.aryan.ecommerce_backend.user.entity.Role;
 import com.aryan.ecommerce_backend.user.entity.User;
 import com.aryan.ecommerce_backend.user.repository.UserRepository;
@@ -29,12 +30,20 @@ public class AuthServiceTest {
 
     @Mock
     private UserRepository userRepository;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtService jwtService;
-    @Mock private AuthenticationManager authenticationManager;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private AuthenticationManager authenticationManager;
+    @Mock
+    private RefreshTokenService refreshTokenService;
 
     @InjectMocks
     private AuthService authService;
+
+
+
 
     @Test
     void register_success_returnsTokens() {
