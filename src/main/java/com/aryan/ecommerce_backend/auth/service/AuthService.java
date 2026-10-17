@@ -1,5 +1,5 @@
-package com.aryan.ecommerce_backend.auth.service;
 
+package com.aryan.ecommerce_backend.auth.service;
 
 import com.aryan.ecommerce_backend.auth.dto.AuthResponse;
 import com.aryan.ecommerce_backend.auth.dto.LoginRequest;
@@ -8,6 +8,7 @@ import com.aryan.ecommerce_backend.exception.BadRequestException;
 import com.aryan.ecommerce_backend.exception.ResourceNotFoundException;
 import com.aryan.ecommerce_backend.security.jwt.JwtService;
 import com.aryan.ecommerce_backend.security.user.CustomUserDetails;
+import com.aryan.ecommerce_backend.token.service.RefreshTokenService;
 import com.aryan.ecommerce_backend.user.entity.Role;
 import com.aryan.ecommerce_backend.user.entity.User;
 import com.aryan.ecommerce_backend.user.repository.UserRepository;
@@ -16,19 +17,37 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final RefreshTokenService refreshTokenService;
 
-    public AuthResponse register(RegisterRequest request){
-        if(userRepository.existsByEmail(request.email())){
+    private AuthResponse issueTokens(User user) {
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+
+        String refreshToken =
+                jwtService.generateRefreshToken(userDetails);
+
+        refreshTokenService.store(user, refreshToken);
+
+        return new AuthResponse(
+                jwtService.generateAccessToken(userDetails),
+                refreshToken
+        );
+    }
+
+    public AuthResponse register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new BadRequestException("User is already registered.");
         }
+
         User user = User.builder()
                 .name(request.name())
                 .email(request.email())
@@ -38,24 +57,32 @@ public class AuthService {
 
         userRepository.save(user);
 
-        CustomUserDetails userDetails = new CustomUserDetails(user);
-        return new AuthResponse(
-                jwtService.generateAccessToken(userDetails),
-                jwtService.generateRefreshToken(userDetails)
-        );
+        return issueTokens(user);
     }
 
-    public AuthResponse login(LoginRequest request){
+    public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
+                new UsernamePasswordAuthenticationToken(
+                        request.email(),
+                        request.password()
+                )
         );
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        CustomUserDetails userDetails = new CustomUserDetails(user);
-        return new AuthResponse(
-                jwtService.generateAccessToken(userDetails),
-                jwtService.generateRefreshToken(userDetails)
-        );
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("User not found")
+                );
+
+        return issueTokens(user);
+    }
+
+    @Transactional
+    public AuthResponse refresh(String rawRefreshToken) {
+        User user = refreshTokenService.consume(rawRefreshToken);
+        return issueTokens(user);
+    }
+
+    public void logout(String rawRefreshToken) {
+        refreshTokenService.revoke(rawRefreshToken);
     }
 }
