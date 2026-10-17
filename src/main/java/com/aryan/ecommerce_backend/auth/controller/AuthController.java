@@ -2,6 +2,7 @@ package com.aryan.ecommerce_backend.auth.controller;
 
 import com.aryan.ecommerce_backend.auth.dto.AuthResponse;
 import com.aryan.ecommerce_backend.auth.dto.LoginRequest;
+import com.aryan.ecommerce_backend.auth.dto.RefreshTokenRequest;
 import com.aryan.ecommerce_backend.auth.dto.RegisterRequest;
 import com.aryan.ecommerce_backend.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +30,17 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request){
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(authService.refresh(request.refreshToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 
 }
