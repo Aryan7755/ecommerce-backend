@@ -53,6 +53,7 @@ public class AuthService {
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .role(Role.USER)
+                .provider("LOCAL")
                 .build();
 
         userRepository.save(user);
@@ -84,5 +85,14 @@ public class AuthService {
 
     public void logout(String rawRefreshToken) {
         refreshTokenService.revoke(rawRefreshToken);
+    }
+
+    @Transactional
+    public AuthResponse loginWithOAuth(String email, String name) {
+        User user = userRepository.findByEmail(email).orElseGet(() ->
+                userRepository.save(User.builder()
+                        .email(email).name(name != null ? name : email)
+                        .role(Role.USER).provider("GOOGLE").build()));
+        return issueTokens(user);
     }
 }
