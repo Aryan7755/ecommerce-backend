@@ -64,15 +64,15 @@ A production-oriented REST API for an e-commerce platform, built with **Spring B
 
 ```mermaid
 flowchart TD
-    A[Client] --> B[LoggingFilter]
-    B --> C[JwtAuthenticationFilter]
-    C --> D[Spring Security rules]
-    D --> E[Controller<br/>validated request DTOs]
-    E --> F[Service<br/>@Transactional business rules]
-    F --> G[Repository<br/>Spring Data JPA]
-    G --> H[(MySQL 8<br/>Flyway migrations)]
-    F --> I[Mapper]
-    I --> J[Response DTO]
+    A["Client"] --> B["LoggingFilter"]
+    B --> C["JwtAuthenticationFilter"]
+    C --> D["Spring Security rules"]
+    D --> E["Controller<br/>validated request DTOs"]
+    E --> F["Service<br/>@Transactional business rules"]
+    F --> G["Repository<br/>Spring Data JPA"]
+    G --> H[("MySQL 8<br/>Flyway migrations")]
+    F --> I["Mapper"]
+    I --> J["Response DTO"]
 ```
 
 ---
